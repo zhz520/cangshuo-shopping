@@ -19,3 +19,22 @@ export const getCartList = () => {
     method: 'get'
   })
 }
+
+export const changeCount = (goodsId, goodsNum, goodsSkuId) => {
+  return request.post('/cart/update', {
+    goodsId,
+    goodsNum,
+    goodsSkuId
+  })
+}
+
+// 删除购物车
+export const delSelect = (cartIds) => {
+  return request({
+    url: '/cart/clear',
+    method: 'post',
+    data: {
+      cartIds
+    }
+  })
+}

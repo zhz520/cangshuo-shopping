@@ -122,7 +122,7 @@
           <div @click="addCart" class="btn" v-if="mode === 'cart'">
             加入购物车
           </div>
-          <div class="btn now" v-else>立刻购买</div>
+          <div class="btn now" @click="goPay" v-else>立刻购买</div>
         </div>
 
         <div class="btn-none" v-else>该商品已抢完</div>
@@ -136,8 +136,10 @@ import { getProComments, getProDetail } from '@/api/product'
 import defaultImg from '@/assets/default-avatar.png'
 import CountBoxVue from '@/components/CountBox.vue'
 import { addCart } from '@/api/cart'
+import loginConfirm from '@/mixins/loginConfirm'
 export default {
   name: 'ProDetail',
+  mixins: [loginConfirm],
   data () {
     return {
       images: [
@@ -196,27 +198,7 @@ export default {
     },
 
     async addCart () {
-      const token = this.$store.state.user.userInfo.token
-      if (!token) {
-        this.$dialog
-          .confirm({
-            title: '温馨提示',
-            message: '此时需要先登录才能操作饿',
-            confirmButtonText: '去登陆',
-            cancelButtonText: '再逛逛'
-          })
-          .then(() => {
-            // on confirm
-            this.$router.replace({
-              path: '/login',
-              query: {
-                backUrl: this.$route.fullPath
-              }
-            })
-          })
-          .catch(() => {
-            // on cancel
-          })
+      if (this.loginConfirm()) {
         return
       }
       const { data, message } = await addCart(
@@ -228,6 +210,20 @@ export default {
       this.cartTotal = data.cartTotal
       this.$toast.success(message)
       this.showPannel = false
+    },
+    goPay () {
+      if (this.loginConfirm()) {
+        return
+      }
+      this.$router.push({
+        path: '/pay',
+        query: {
+          mode: 'buyNow',
+          goodsId: this.goodsId,
+          goods_sku_id: this.detail.skuList[0].goods_sku_id,
+          goodsNum: this.addCount
+        }
+      })
     }
   },
   created () {
@@ -448,5 +444,4 @@ export default {
     border-radius: 50%;
   }
 }
-
 </style>
